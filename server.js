@@ -1,15 +1,17 @@
-import express from "express";
 import "dotenv/config";
-import userRoutes from "./src/routes/userRoutes.js";
-import errorHandler from "./src/middlewares/errorHandler.js";
+import app from "./src/app.js";
+import pool from "./src/config/db.js";
 
-const app = express();
-const port = process.env.PORT;
+const PORT = process.env.PORT;
 
-app.use(express.json());
-app.use("/api", userRoutes);
-app.use(errorHandler)
+const server = app.listen(PORT, () => {
+  console.log(`Server berjalan di port ${PORT}`);
+});
 
-app.listen(port, () => {
-  console.log(`Aplikasi Berjalan di port ${port}`);
+process.on("SIGINT", async () => {
+  server.close(async () => {
+    await pool.end();
+    console.log("Server dan koneksi databse ditutup");
+    process.exit(0);
+  });
 });
