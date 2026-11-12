@@ -6,7 +6,7 @@ class AuthRepository {
         SELECT u.id, u.username, u.email, u.password, u.role_id, r.name as role
         FROM users u
         LEFT JOIN roles r ON u.role_id = r.id
-        WHERE u.email = $1
+        WHERE u.email = $1 AND u.deleted_at IS NULL
     `;
     const { rows } = await query(queryText, [email]);
     return rows[0];

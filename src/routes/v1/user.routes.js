@@ -5,6 +5,7 @@ import {
   createUser,
   updateUser,
   deleteUser,
+  restoreUser,
 } from "../../controllers/user.controller.js";
 import { authenticate } from '../../middlewares/auth.middleware.js'
 import { authorize } from "../../middlewares/rbac.middleware.js";
@@ -19,5 +20,6 @@ router.get('/:id', getUserById)
 router.post('/', createUser)
 router.put('/:id', updateUser)
 router.delete('/:id', deleteUser)
+router.patch('/:id', restoreUser)
 
 export default router

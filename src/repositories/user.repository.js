@@ -6,6 +6,7 @@ class UserRepository {
         SELECT u.id, u.username, u.email, r.name as role, u.created_at
         FROM users u
         LEFT JOIN roles r ON u.role_id = r.id
+        WHERE u.deleted_at IS NULL
         ORDER BY u.created_at DESC
         `;
     const { rows } = await query(queryText);
@@ -17,7 +18,7 @@ class UserRepository {
         SELECT u.id, u.username, u.email, u.role_id, r.name as role u.created_at
         FROM users u
         LEFT JOIN roles r ON u.role_id = r.id
-        WHERE u.id = $1
+        WHERE u.id = $1 AND u.deleted_at IS NULL
     `;
     const { rows } = await query(queryText, [id]);
     return rows[0];
@@ -28,7 +29,7 @@ class UserRepository {
         SELECT u.*, r.name as role_name
         FROM users u
         LEFT JOIN roles r ON u.role_id = r.id
-        WHERE u.email = $1
+        WHERE u.email = $1 AND u.deleted IS NULL
     `;
     const { rows } = await query(queryText, [email]);
     return rows[0];
@@ -55,14 +56,36 @@ class UserRepository {
         SET username = COALESCE($1, username),
             email = COALESCE ($2, email),
             role_id = COALESCE ($3, role_id)
-        WHERE id = $4
+        WHERE id = $4 AND deleted_at IS NULL
         RETURNING id, username, email, role_id, created_at
     `;
     const { rows } = await query(queryText, [username, email, roleId, id]);
     return rows[0];
   }
 
-  static async delete(id) {
+  static async softDelete(id) {
+    const queryText = `
+        UPDATE users
+        SET deleted_at = CURRENT_TIMESTAMP
+        WHERE id = $1 AND deleted_at IS NULL
+        RETURNING id, username, email, deleted_at
+    `;
+    const { rows } = await query(queryText, [id]);
+    return rows[0];
+  }
+
+  static async restore(id) {
+    const queryText = `
+        UPDATE users
+        SET deleted_at = NULL
+        WHERE id = $1 AND deleted_at IS NOT NULL
+        RETURNING id, username, email, role_id, created_at
+    `;
+    const { rows } = await query(queryText, [id]);
+    return rows[0];
+  }
+
+  static async hardDelete(id) {
     const queryText = `
         DELETE FROM users
         WHERE id = $1

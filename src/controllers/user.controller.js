@@ -45,3 +45,12 @@ export const deleteUser = async (req, res, next) => {
     next(error);
   }
 };
+
+export const restoreUser = async (req, res, next) => {
+  try {
+    const user = await UserService.restoreUser(req.params.id);
+    return successResponse(res, "User berhasil dipulihkan", user);
+  } catch (error) {
+    next(error);
+  }
+};

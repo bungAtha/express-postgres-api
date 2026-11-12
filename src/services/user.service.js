@@ -39,7 +39,15 @@ class UserService {
   static async deleteUser(id) {
     await this.getUserById(id);
 
-    return await UserRepository.delete(id);
+    return await UserRepository.softDelete(id);
+  }
+
+  static async restoreUser(id) {
+    const restoredUser = await UserRepository.restore(id);
+    if (!restoredUser) {
+      throw new ApiError(404, "User tidak ditemukan di kotak sampah");
+    }
+    return restoredUser;
   }
 }
 
