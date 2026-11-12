@@ -1,4 +1,4 @@
-import pool from "../config/db.js"
+import { query } from "../config/db.js";
 
 class AuthRepository {
   static async findByEmail(email) {
@@ -8,7 +8,7 @@ class AuthRepository {
         LEFT JOIN roles r ON u.role_id = r.id
         WHERE u.email = $1
     `;
-    const { rows } = await pool.query(queryText, [email]);
+    const { rows } = await query(queryText, [email]);
     return rows[0];
   }
 
@@ -18,7 +18,7 @@ class AuthRepository {
         FROM users u
         WHERE u.username = $1
     `;
-    const { rows } = await pool.query(queryText, [username]);
+    const { rows } = await query(queryText, [username]);
     return rows[0];
   }
 
@@ -28,7 +28,7 @@ class AuthRepository {
         VALUES ($1, $2, $3, $4)
         RETURNING id, username, email, role_id, created_at
     `;
-    const { rows } = await pool.query(queryText, [
+    const { rows } = await query(queryText, [
       username,
       email,
       password,
