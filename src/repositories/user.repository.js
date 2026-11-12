@@ -57,7 +57,7 @@ class UserRepository {
             email = COALESCE ($2, email),
             role_id = COALESCE ($3, role_id)
         WHERE id = $4 AND deleted_at IS NULL
-        RETURNING id, username, email, role_id, created_at
+        RETURNING id, username, email, role_id, created_at, updated_at
     `;
     const { rows } = await query(queryText, [username, email, roleId, id]);
     return rows[0];
