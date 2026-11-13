@@ -6,20 +6,50 @@ import {
   updateUser,
   deleteUser,
   restoreUser,
+  updateUserRole,
 } from "../../controllers/user.controller.js";
-import { authenticate } from '../../middlewares/auth.middleware.js'
+import {
+  authenticate,
+  requirePermission,
+  requireOwnerOrPermission,
+} from "../../middlewares/auth.middleware.js";
 import { authorize } from "../../middlewares/rbac.middleware.js";
+import { PERMISSIONS } from "../../config/roles.js";
+import { validate } from "../../middlewares/validate.middleware.js";
+import { updateUserRoleSchema } from "../../validations/user.validation.js";
 
-const router = Router()
+const router = Router();
 
-router.use(authenticate)
-router.use(authorize('admin'))
+router.use(authenticate);
 
-router.get('/', getUsers)
-router.get('/:id', getUserById)
-router.post('/', createUser)
-router.put('/:id', updateUser)
-router.delete('/:id', deleteUser)
-router.patch('/:id', restoreUser)
+router.get("/", requirePermission(PERMISSIONS.USER_READ_ALL), getUsers);
+router.get(
+  "/:id",
+  requireOwnerOrPermission(PERMISSIONS.USER_READ_ALL),
+  getUserById,
+);
+router.post("/", requireOwnerOrPermission(PERMISSIONS.USER_MANAGE), createUser);
+router.put(
+  "/:id",
+  requireOwnerOrPermission(PERMISSIONS.USER_MANAGE),
+  updateUser,
+);
+router.delete(
+  "/:id",
+  requireOwnerOrPermission(PERMISSIONS.USER_MANAGE),
+  deleteUser,
+);
+router.patch(
+  "/:id",
+  requireOwnerOrPermission(PERMISSIONS.USER_RESTORE),
+  restoreUser,
+);
+router.patch(
+  "/:id/role",
+  authenticate,
+  requireOwnerOrPermission(PERMISSIONS.USER_MANAGE_ROLES),
+  validate(updateUserRoleSchema),
+  updateUserRole,
+);
 
-export default router
+export default router;

@@ -36,6 +36,20 @@ class UserService {
     return await UserRepository.update(id, updateData);
   }
 
+  static async changeUserRole(userId, roleId) {
+    const roleExists = await UserRepository.findRoleById(roleId);
+    if (!roleExists) {
+      throw new ApiError(404, "Role tidak di temukan");
+    }
+
+    const updatedUser = await UserRepository.updateRole(userId, roleId);
+    if (!updatedUser) {
+      throw new ApiError(404, "User tidak ditemukan atau sudah di hapus");
+    }
+
+    return updatedUser;
+  }
+
   static async deleteUser(id) {
     await this.getUserById(id);
 

@@ -15,12 +15,22 @@ class UserRepository {
 
   static async findById(id) {
     const queryText = `
-        SELECT u.id, u.username, u.email, u.role_id, r.name as role u.created_at
+        SELECT u.id, u.username, u.email, u.role_id, r.name as role, u.created_at
         FROM users u
         LEFT JOIN roles r ON u.role_id = r.id
         WHERE u.id = $1 AND u.deleted_at IS NULL
     `;
     const { rows } = await query(queryText, [id]);
+    return rows[0];
+  }
+
+  static async findRoleById(roleId) {
+    const queryText = `
+        SELECT id, name
+        FROM roles
+        WHERE id = $1
+    `;
+    const { rows } = await query(queryText, [roleId]);
     return rows[0];
   }
 
@@ -60,6 +70,28 @@ class UserRepository {
         RETURNING id, username, email, role_id, created_at, updated_at
     `;
     const { rows } = await query(queryText, [username, email, roleId, id]);
+    return rows[0];
+  }
+
+  static async updateRole(userId, roleId) {
+    const queryText = `
+        WITH updated_user as (
+          UPDATE users
+          SET role_id = $1
+          WHERE id = $2 AND deleted_at IS NULL
+          RETURNING id, username, email, role_id, updated_at
+        )
+        SELECT
+          u.id,
+          u.username,
+          u.email,
+          u.role_id,
+          r.name as role,
+          u.updated_at
+        FROM updated_user u
+        LEFT JOIN roles r ON u.role_id = r.id
+    `;
+    const { rows } = await query(queryText, [roleId, userId]);
     return rows[0];
   }
 

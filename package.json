@@ -9,7 +9,8 @@
     "migrate:create": "node-pg-migrate create",
     "migrate:up": "node-pg-migrate up",
     "migrate:down": "node-pg-migrate down",
-    "db:seed": "node src/seeders/seed.js"
+    "db:seed": "node src/seeders/seed.js",
+    "db:seed:superadmin": "node src/seeders/superadmin.seeder.js"
   },
   "keywords": [],
   "author": "",

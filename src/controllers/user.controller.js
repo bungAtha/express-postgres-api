@@ -37,6 +37,25 @@ export const updateUser = async (req, res, next) => {
   }
 };
 
+export const updateUserRole = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { role_id } = req.body;
+
+    if (req.user?.id === Number(id)) {
+      return res.status(400).json({
+        succes: false,
+        message: "Anda tidak dapat mengubah role akun anda sendiri",
+      });
+    }
+
+    const updatedUser = await UserService.changeUserRole(id, role_id);
+    return successResponse(res, "Role user berhasil diperbarui", updatedUser);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const deleteUser = async (req, res, next) => {
   try {
     await UserService.deleteUser(req.params.id);
